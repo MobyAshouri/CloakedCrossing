@@ -2,7 +2,7 @@ import pygame as pg
 
 pg.init()
 pg.display.set_caption("Cloaked Crossing")
-pg.display.set_icon(pg.image.load("images\\icon.jpg"))
+pg.display.set_icon(pg.image.load("images/icon.jpg"))
 screen = pg.display.set_mode((1280, 720))
 clock = pg.time.Clock()
 running = True
@@ -26,15 +26,37 @@ class Player:
     def __init__(self, playerModel) -> None:
         self.posX = 100
         self.posY = 540
+        self.playerHeight = 60
+        self.playerWidth = 30
 
-        self.vel_y = 0
+        self.jumpVelocity = 1
+        self.currentJumpHeight = 0
+        self.maxJumpHeight = 25
 
-        self.gravity = 1
-        self.isPlayerFalling = False
+        self.gravity = 4
+        self.isFalling = False
+        self.isGrounded = True
 
-        self.movementSpeed = 2
+        self.movementSpeed = 3
         self.playerModel = playerModel
-        self.playerEntity = pg.transform.scale(pg.image.load(playerModel), (30, 60))
+        self.playerEntity = pg.transform.scale(pg.image.load(self.playerModel), (self.playerWidth, self.playerHeight))
+
+        self.spriteCounter = 0
+
+        self.idleSprites = [
+            "images/idle/idle1.png",
+            "images/idle/idle2.png",
+            "images/idle/idle3.png",
+            "images/idle/idle4.png",
+        ]
+        self.runRightSprites = [
+            "images/runRight/runRight1.png",
+            "images/runRight/runRight2.png",
+            "images/runRight/runRight3.png",
+            "images/runRight/runRight4.png",
+            "images/runRight/runRight5.png",
+            "images/runRight/runRight6.png",
+        ]
 
         
 
@@ -42,19 +64,25 @@ class Player:
         self.posX = x
         self.posY = y
 
-        if self.posX < screen.get_width()-screen.get_width():
-            self.posX = screen.get_width()-screen.get_width()
-        elif self.posX > screen.get_width()-30:
-            self.posX = screen.get_width()-30
-
-        screen.blit(self.playerEntity, (self.posX, self.posY))
-
     def renderPlayer(self):
+        self.playerEntity = pg.transform.scale(pg.image.load(self.playerModel), (self.playerWidth, self.playerHeight))
         screen.blit(self.playerEntity, (self.posX, self.posY))
 
     def jump(self):
+        if self.currentJumpHeight < self.maxJumpHeight:     ## check to see if current JH is at 0 instead
+            self.isGrounded = False
+            self.currentJumpHeight += self.jumpVelocity
+            self.posY -= self.currentJumpHeight
 
-        pass
+        elif self.currentJumpHeight >= self.maxJumpHeight and self.isGrounded:
+            self.currentJumpHeight = 0
+
+        print(self.currentJumpHeight)
+
+    def crouch(self):
+        if self.isGrounded:
+            print("crouch")
+
 
     def attackLight(self):
         print("attack")
@@ -65,7 +93,7 @@ class Player:
 
 
 
-player = Player("images\\stickFigure.png")
+player = Player("images/stickFigure.png")
 
 while running:
     for event in pg.event.get():
@@ -75,29 +103,46 @@ while running:
     # fill the screen with a color to wipe away anything from last frame
     screen.fill("white")
 
+    player.spriteCounter+=1
+
     level = Level()
     level.drawFloor()
     
     keys = pg.key.get_pressed()
     if keys[pg.K_w] or keys[pg.K_SPACE]:
         ## jump
-        player.jump()
-        player.renderPlayer()
+        player.jump()        
         pass
     if keys[pg.K_s]:
-        ## crouch
+        player.crouch()
         pass
     if keys[pg.K_a]:
         player.movePlayer(player.posX-player.movementSpeed, player.posY)
     if keys[pg.K_d]:
         player.movePlayer(player.posX+player.movementSpeed, player.posY)
 
-    player.renderPlayer()
+    player.posY += player.gravity
 
+    if player.posX < screen.get_width()-screen.get_width():
+        player.posX = screen.get_width()-screen.get_width()
+    elif player.posX > screen.get_width()-30:
+        player.posX = screen.get_width()-30
+
+    if player.posY > level.floorY-60:
+        player.isGrounded = True
+        player.posY = level.floorY-60
+
+    if not(player.isGrounded):
+        player.movementSpeed = 2
+    elif player.isGrounded:
+        player.movementSpeed = 5
+
+    player.renderPlayer()
 
     # flip() the display to put your work on screen
     pg.display.flip()
 
+    player.spriteCounter+=1
     dt = clock.tick(144) / 1000
 
 pg.quit()
