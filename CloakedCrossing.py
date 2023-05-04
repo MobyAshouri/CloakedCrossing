@@ -49,14 +49,7 @@ class Player:
             "images/idle/idle3.png",
             "images/idle/idle4.png",
         ]
-        self.runRightSprites = [
-            "images/runRight/runRight1.png",
-            "images/runRight/runRight2.png",
-            "images/runRight/runRight3.png",
-            "images/runRight/runRight4.png",
-            "images/runRight/runRight5.png",
-            "images/runRight/runRight6.png",
-        ]
+        
 
         
 
