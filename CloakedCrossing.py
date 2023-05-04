@@ -1,4 +1,5 @@
 import pygame as pg
+import math
 
 pg.init()
 pg.display.set_caption("Cloaked Crossing")
@@ -133,7 +134,7 @@ while running:
         player.posY = level.floorY-60
 
     if not(player.isGrounded):
-        player.movementSpeed = 2
+        player.movementSpeed = 5
     elif player.isGrounded:
         player.movementSpeed = 5
 
