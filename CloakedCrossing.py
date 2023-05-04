@@ -1,4 +1,5 @@
 import pygame as pg
+import math
 
 pg.init()
 pg.display.set_caption("Cloaked Crossing")
@@ -29,13 +30,10 @@ class Player:
         self.playerHeight = 60
         self.playerWidth = 30
 
-        self.jumpVelocity = 1
         self.currentJumpHeight = 0
-        self.maxJumpHeight = 25
+        self.maxJumpHeight = 10
 
         self.gravity = 4
-        self.isFalling = False
-        self.isGrounded = True
 
         self.movementSpeed = 3
         self.playerModel = playerModel
@@ -49,7 +47,14 @@ class Player:
             "images/idle/idle3.png",
             "images/idle/idle4.png",
         ]
-        
+        self.runRightSprites = [
+            "images/runRight/runRight1.png",
+            "images/runRight/runRight2.png",
+            "images/runRight/runRight3.png",
+            "images/runRight/runRight4.png",
+            "images/runRight/runRight5.png",
+            "images/runRight/runRight6.png",
+        ]
 
         
 
@@ -62,15 +67,7 @@ class Player:
         screen.blit(self.playerEntity, (self.posX, self.posY))
 
     def jump(self):
-        if self.currentJumpHeight < self.maxJumpHeight:     ## check to see if current JH is at 0 instead
-            self.isGrounded = False
-            self.currentJumpHeight += self.jumpVelocity
-            self.posY -= self.currentJumpHeight
-
-        elif self.currentJumpHeight >= self.maxJumpHeight and self.isGrounded:
-            self.currentJumpHeight = 0
-
-        print(self.currentJumpHeight)
+        pass
 
     def crouch(self):
         if self.isGrounded:
@@ -122,13 +119,8 @@ while running:
         player.posX = screen.get_width()-30
 
     if player.posY > level.floorY-60:
-        player.isGrounded = True
         player.posY = level.floorY-60
 
-    if not(player.isGrounded):
-        player.movementSpeed = 2
-    elif player.isGrounded:
-        player.movementSpeed = 5
 
     player.renderPlayer()
 
