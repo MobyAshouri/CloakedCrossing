@@ -30,15 +30,15 @@ class Player:
         self.playerHeight = 60
         self.playerWidth = 30
 
-        self.jumpVelocity = 1
-        self.currentJumpHeight = 0
-        self.maxJumpHeight = 25
+        self.jumpHeight = 22
+        self.jumpCounter = self.jumpHeight
+        self.isJumping = False
+        self.gravity = 1
 
-        self.gravity = 4
-        self.isFalling = False
-        self.isGrounded = True
+        self.isSprinting = False
+        self.sprintSpeed = 5      # speed added to base movement speed for sprint
 
-        self.movementSpeed = 3
+        self.movementSpeed = 5
         self.playerModel = playerModel
         self.playerEntity = pg.transform.scale(pg.image.load(self.playerModel), (self.playerWidth, self.playerHeight))
 
@@ -70,19 +70,30 @@ class Player:
         screen.blit(self.playerEntity, (self.posX, self.posY))
 
     def jump(self):
-        if self.currentJumpHeight < self.maxJumpHeight:     ## check to see if current JH is at 0 instead
-            self.isGrounded = False
-            self.currentJumpHeight += self.jumpVelocity
-            self.posY -= self.currentJumpHeight
+        self.isJumping = True
 
-        elif self.currentJumpHeight >= self.maxJumpHeight and self.isGrounded:
-            self.currentJumpHeight = 0
-
-        print(self.currentJumpHeight)
+    def jumpContinue(self):
+        if self.jumpCounter >= -self.jumpHeight:
+            self.posY -= .05 * (self.jumpCounter*abs(self.jumpCounter))         # ax^2
+            self.jumpCounter-=1
+        else:
+            self.jumpCounter = self.jumpHeight
+            self.isJumping = False
 
     def crouch(self):
-        if self.isGrounded:
+        if not self.isJumping:
             print("crouch")
+
+    def sprint(self):
+        self.isSprinting = True
+
+    def sprintContinue(self):
+        if keys[pg.K_d]:
+            self.posX+=self.sprintSpeed
+        elif keys[pg.K_a]:
+            self.posX-=self.sprintSpeed
+        else:
+            self.isSprinting = False
 
 
     def attackLight(self):
@@ -110,10 +121,12 @@ while running:
     level.drawFloor()
     
     keys = pg.key.get_pressed()
-    if keys[pg.K_w] or keys[pg.K_SPACE]:
-        ## jump
-        player.jump()        
-        pass
+
+    if keys[pg.K_SPACE] or keys[pg.K_w]:
+        player.jump()
+    if player.isJumping:
+        player.jumpContinue()
+
     if keys[pg.K_s]:
         player.crouch()
         pass
@@ -121,6 +134,11 @@ while running:
         player.movePlayer(player.posX-player.movementSpeed, player.posY)
     if keys[pg.K_d]:
         player.movePlayer(player.posX+player.movementSpeed, player.posY)
+
+    if keys[pg.K_LSHIFT]:
+        player.sprint()
+    if player.isSprinting:
+        player.sprintContinue()
 
     player.posY += player.gravity
 
@@ -130,13 +148,8 @@ while running:
         player.posX = screen.get_width()-30
 
     if player.posY > level.floorY-60:
-        player.isGrounded = True
         player.posY = level.floorY-60
 
-    if not(player.isGrounded):
-        player.movementSpeed = 5
-    elif player.isGrounded:
-        player.movementSpeed = 5
 
     player.renderPlayer()
 
