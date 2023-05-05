@@ -1,5 +1,4 @@
 import pygame as pg
-import math
 
 pg.init()
 pg.display.set_caption("Cloaked Crossing")
@@ -30,12 +29,15 @@ class Player:
         self.playerHeight = 60
         self.playerWidth = 30
 
-        self.currentJumpHeight = 0
-        self.maxJumpHeight = 10
+        self.jumpHeight = 22
+        self.jumpCounter = self.jumpHeight
+        self.isJumping = False
+        self.gravity = 1
 
-        self.gravity = 4
+        self.isSprinting = False
+        self.sprintSpeed = 5      # speed added to base movement speed for sprint
 
-        self.movementSpeed = 3
+        self.movementSpeed = 5
         self.playerModel = playerModel
         self.playerEntity = pg.transform.scale(pg.image.load(self.playerModel), (self.playerWidth, self.playerHeight))
 
@@ -67,11 +69,30 @@ class Player:
         screen.blit(self.playerEntity, (self.posX, self.posY))
 
     def jump(self):
-        pass
+        self.isJumping = True
+
+    def jumpContinue(self):
+        if self.jumpCounter >= -self.jumpHeight:
+            self.posY -= .05 * (self.jumpCounter*abs(self.jumpCounter))         # ax^2
+            self.jumpCounter-=1
+        else:
+            self.jumpCounter = self.jumpHeight
+            self.isJumping = False
 
     def crouch(self):
-        if self.isGrounded:
+        if not self.isJumping:
             print("crouch")
+
+    def sprint(self):
+        self.isSprinting = True
+
+    def sprintContinue(self):
+        if keys[pg.K_d]:
+            self.posX+=self.sprintSpeed
+        elif keys[pg.K_a]:
+            self.posX-=self.sprintSpeed
+        else:
+            self.isSprinting = False
 
 
     def attackLight(self):
@@ -99,10 +120,12 @@ while running:
     level.drawFloor()
     
     keys = pg.key.get_pressed()
-    if keys[pg.K_w] or keys[pg.K_SPACE]:
-        ## jump
-        player.jump()        
-        pass
+
+    if keys[pg.K_SPACE] or keys[pg.K_w]:
+        player.jump()
+    if player.isJumping:
+        player.jumpContinue()
+
     if keys[pg.K_s]:
         player.crouch()
         pass
@@ -110,6 +133,11 @@ while running:
         player.movePlayer(player.posX-player.movementSpeed, player.posY)
     if keys[pg.K_d]:
         player.movePlayer(player.posX+player.movementSpeed, player.posY)
+
+    if keys[pg.K_LSHIFT]:
+        player.sprint()
+    if player.isSprinting:
+        player.sprintContinue()
 
     player.posY += player.gravity
 
